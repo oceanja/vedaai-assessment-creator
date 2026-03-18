@@ -1,0 +1,100 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  html { font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  body { background-color: #F3F4F6; color: #111827; }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-gray-900 text-white px-5 py-2.5 rounded-full text-sm font-semibold
+    hover:bg-gray-700 active:scale-95 transition-all duration-150
+    flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm;
+  }
+
+  .btn-secondary {
+    @apply bg-white text-gray-700 border border-gray-200 px-5 py-2.5 rounded-full text-sm font-medium
+    hover:bg-gray-50 active:scale-95 transition-all duration-150
+    flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-orange {
+    @apply bg-brand-orange text-white px-5 py-2.5 rounded-full text-sm font-semibold
+    hover:bg-orange-500 active:scale-95 transition-all duration-150
+    flex items-center gap-2 shadow-sm;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl shadow-card p-5 md:p-6;
+  }
+
+  .input-field {
+    @apply w-full border border-gray-200 rounded-xl px-4 py-3 text-sm
+    text-gray-900 placeholder-gray-400 outline-none bg-white
+    focus:ring-2 focus:ring-brand-orange/20 focus:border-brand-orange
+    transition-all duration-150;
+  }
+
+  .difficulty-easy {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
+    bg-emerald-50 text-emerald-700 border border-emerald-200;
+  }
+
+  .difficulty-medium {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
+    bg-amber-50 text-amber-700 border border-amber-200;
+  }
+
+  .difficulty-hard {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
+    bg-red-50 text-red-700 border border-red-200;
+  }
+
+  .nav-link {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150
+    text-sidebar-text hover:bg-sidebar-hover hover:text-sidebar-textActive;
+  }
+
+  .nav-link-active {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150
+    bg-sidebar-active text-sidebar-textActive font-medium;
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
+
+/* Spinner */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+  display: inline-block; width: 18px; height: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white; border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+/* Bounce dots */
+@keyframes bounce-dot {
+  0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+  40% { transform: scale(1.2); opacity: 1; }
+}
+.bounce-dot { animation: bounce-dot 1.2s ease-in-out infinite; }
+
+/* Fade in */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.fade-in { animation: fadeIn 0.3s ease-out forwards; }
+
+/* Slide in from left */
+@keyframes slideInLeft { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+.slide-in-left { animation: slideInLeft 0.25s ease-out forwards; }
+
+/* Overlay */
+@keyframes fadeInOverlay { from { opacity: 0; } to { opacity: 1; } }
+.overlay-fade { animation: fadeInOverlay 0.2s ease-out forwards; }
