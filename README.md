@@ -1,146 +1,145 @@
-# VedaAI – AI Assessment Creator
+<div align="center">
 
-An AI-powered question paper generator for teachers. Create structured exam papers with AI, in seconds.
+<img src="https://img.shields.io/badge/VedaAI-Assessment%20Creator-E07B39?style=for-the-badge&logo=bookstack&logoColor=white" alt="VedaAI" />
+
+# AI Assessment Creator
+
+### Generate structured, exam-ready question papers in seconds using AI
+
+[![Next.js](https://img.shields.io/badge/Next.js_14-black?style=flat-square&logo=next.js)](https://nextjs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://typescriptlang.org)
+[![Express](https://img.shields.io/badge/Express-000000?style=flat-square&logo=express&logoColor=white)](https://expressjs.com)
+[![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white)](https://mongodb.com)
+[![Redis](https://img.shields.io/badge/Redis-DC382D?style=flat-square&logo=redis&logoColor=white)](https://redis.io)
+[![BullMQ](https://img.shields.io/badge/BullMQ-FF6B6B?style=flat-square&logo=bull&logoColor=white)](https://docs.bullmq.io)
+
+[**▶ Watch Demo**](https://drive.google.com/file/d/1bGe5L6QI3QjKDRcI55ixvLKGDTulyY4H/view?usp=sharing)
+
+> **Note:** In the demo video, MCQ options are not visible — this has since been fixed. MCQs now correctly display A) B) C) D) options beneath each question.
+
+</div>
+
+---
+
+## What is this?
+
+VedaAI Assessment Creator is a full-stack application that lets teachers create professional exam papers using AI. Fill in a form, pick your question types and marks — the AI generates a fully structured, print-ready question paper with difficulty-tagged questions, an answer key, and PDF export. All powered by a real-time async pipeline.
 
 ---
 
 ## Features
 
-- **Assignment creation form** — file upload, due date, dynamic question types with per-section marks
-- **AI question generation** — Groq (Llama 3.3 70B) generates questions per section with difficulty tags (Easy / Moderate / Challenging)
-- **Real-time progress** — WebSocket + BullMQ background job with live status updates
-- **Exam paper output** — structured, print-ready question paper with student info section and answer key
-- **PDF export** — properly formatted PDF via `@react-pdf/renderer`
-- **Regenerate** — re-run AI generation on existing assignments
-- **Mobile responsive** — drawer sidebar + bottom tab navigation on mobile
-
----
-
-## Demo
-
-[Watch Demo Video](https://drive.google.com/file/d/1bGe5L6QI3QjKDRcI55ixvLKGDTulyY4H/view?usp=sharing)
-
-> **Note:** In the demo video, Multiple Choice Questions appear without answer options. This has since been fixed — MCQ questions now correctly display A) B) C) D) options beneath each question.
-
----
-
-## Screenshots
-
-| Dashboard | Create Assignment | Exam Paper Output |
-|---|---|---|
-| Empty state with illustrations | Dynamic question type rows | Structured paper with difficulty badges |
+| | Feature |
+|---|---|
+| 📝 | **Smart Assignment Form** — file upload, due date, dynamic question types with per-section mark controls |
+| 🤖 | **AI Question Generation** — Groq (Llama 3.3 70B) generates questions with proper difficulty distribution |
+| ⚡ | **Real-time Updates** — WebSocket + BullMQ background jobs; the UI updates live as generation completes |
+| 📄 | **Structured Exam Paper** — sections, difficulty badges (Easy / Moderate / Challenging), student info, answer key |
+| 🔤 | **MCQ with Options** — Multiple Choice Questions include A) B) C) D) answer options |
+| 📥 | **PDF Export** — properly formatted PDF via `@react-pdf/renderer` (not raw HTML print) |
+| 🔄 | **Regenerate** — re-run AI on any existing assignment |
+| 📱 | **Mobile Responsive** — drawer sidebar + bottom tab navigation on mobile |
+| 🛡️ | **Safe AI Output** — every AI response validated with Zod before hitting the DB or UI |
 
 ---
 
 ## Architecture
 
 ```
-Frontend (Next.js 14)              Backend (Express + TypeScript)
-┌────────────────────────┐         ┌──────────────────────────────┐
-│  /assignments          │──POST──▶│  POST /api/assignments        │
-│  (Dashboard)           │         │  → validates input            │
-│                        │         │  → saves to MongoDB           │
-│  /assignments/create   │         │  → enqueues BullMQ job        │
-│  (Zustand form state)  │◀──WS───│  → returns { assignmentId }   │
-│                        │         │                               │
-│  /assignments/[id]     │         │  BullMQ Worker                │
-│  (output + PDF)        │         │  → calls Groq API             │
-└────────────────────────┘         │  → validates with Zod         │
-                                   │  → stores GeneratedPaper      │
-         Zustand store             │  → notifies via WebSocket     │
-         WebSocket client          └──────────────────────────────┘
-                                          │           │
-                                       Redis        MongoDB
-                                    (job queue)   (assignments
-                                                  + results)
+Teacher fills form
+       │
+       ▼
+POST /api/assignments          ←── Next.js frontend (Zustand state)
+       │                                    ▲
+       ├── Save to MongoDB                  │ WebSocket
+       ├── Enqueue BullMQ job               │ (real-time updates)
+       └── Return { assignmentId }          │
+                                            │
+       BullMQ Worker ──────────────────────►┘
+       ├── Calls Groq API (Llama 3.3 70B)
+       ├── Validates response with Zod
+       ├── Stores GeneratedPaper in MongoDB
+       └── Broadcasts via WebSocket
+
+Infrastructure:
+├── Redis     → BullMQ job queue + state
+└── MongoDB   → Assignments + generated papers
 ```
 
-### Data Flow
+### Full Request Flow
 
-1. Teacher fills the assignment form (Zustand state)
-2. Submit → `POST /api/assignments` → returns `{ assignmentId }`
-3. Frontend opens WebSocket, subscribes to `assignmentId`
-4. Backend enqueues BullMQ job, immediately returns
-5. Worker calls Groq API (`llama-3.3-70b-versatile`) with structured prompt
-6. Response validated with Zod schema — never rendered raw
-7. Result stored in MongoDB
-8. WebSocket pushes `{ type: "status_update", status: "done", data: GeneratedPaper }`
-9. Frontend renders structured exam paper
-10. Fallback polling every 5s if WebSocket drops
+```
+1. Form submit  →  POST /api/assignments  →  { assignmentId }
+2. WS connect   →  subscribe(assignmentId)
+3. Worker       →  queued → processing → done
+4. WS push      →  { status: "done", data: GeneratedPaper }
+5. Frontend     →  renders structured exam paper
+6. Fallback     →  polling every 5s if WebSocket drops
+```
 
 ---
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Frontend | Next.js 14, TypeScript, Tailwind CSS |
-| State | Zustand (with devtools) |
-| Backend | Node.js, Express, TypeScript |
-| Database | MongoDB (Mongoose) |
-| Queue | BullMQ + Redis |
-| Real-time | WebSocket (`ws`) |
-| AI | Groq API — `llama-3.3-70b-versatile` |
-| Validation | Zod (AI output schema validation) |
-| PDF | @react-pdf/renderer (client-side) |
+| Layer | Technology | Why |
+|---|---|---|
+| Frontend | Next.js 14 + TypeScript | App Router, SSR, fast DX |
+| State | Zustand | Same power as Redux, 80% less boilerplate |
+| Styling | Tailwind CSS | Utility-first, consistent design system |
+| Backend | Node.js + Express + TypeScript | Fast, typed, well-supported |
+| Database | MongoDB + Mongoose | Flexible schema for AI-generated content |
+| Queue | BullMQ + Redis | Decouples slow AI work from HTTP request |
+| Real-time | WebSocket (`ws`) | Live generation progress without polling |
+| AI | Groq API — `llama-3.3-70b-versatile` | Fast inference, free tier, strong JSON output |
+| Validation | Zod | Schema-safe AI output — never render raw LLM response |
+| PDF | @react-pdf/renderer | Real PDFs with typography, not browser print |
 
 ---
 
-## Setup
+## Getting Started
 
 ### Prerequisites
 
 - Node.js 18+
-- MongoDB running locally (`mongodb://localhost:27017`)
-- Redis running locally (`redis://localhost:6379`)
-- Groq API key (free at [console.groq.com](https://console.groq.com))
+- MongoDB (`brew install mongodb-community`)
+- Redis (`brew install redis`)
+- Groq API key — free at [console.groq.com](https://console.groq.com)
 
 ---
 
-### 1. Start MongoDB & Redis
+### 1. Start Services
 
 ```bash
 brew services start mongodb-community
 brew services start redis
 ```
 
----
-
 ### 2. Backend
 
 ```bash
 cd backend
 npm install
-
-cp .env.example .env
-# Add your GROQ_API_KEY in .env
-
+cp .env.example .env       # then add your GROQ_API_KEY
 npm run dev
+# → http://localhost:4000
 ```
-
-Backend runs on `http://localhost:4000`
-
----
 
 ### 3. Frontend
 
 ```bash
 cd frontend
 npm install
-
 cp .env.local.example .env.local
-
 npm run dev
+# → http://localhost:3000
 ```
-
-Frontend runs on `http://localhost:3000`
 
 ---
 
 ### Environment Variables
 
-**backend/.env**
-```
+**`backend/.env`**
+```env
 PORT=4000
 MONGODB_URI=mongodb://localhost:27017/vedaai
 REDIS_URL=redis://localhost:6379
@@ -149,8 +148,8 @@ FRONTEND_URL=http://localhost:3000
 NODE_ENV=development
 ```
 
-**frontend/.env.local**
-```
+**`frontend/.env.local`**
+```env
 NEXT_PUBLIC_API_URL=http://localhost:4000
 NEXT_PUBLIC_WS_URL=ws://localhost:4000
 ```
@@ -160,85 +159,77 @@ NEXT_PUBLIC_WS_URL=ws://localhost:4000
 ## Project Structure
 
 ```
-├── frontend/
-│   └── src/
-│       ├── app/
-│       │   ├── page.tsx                        (redirects to /assignments)
-│       │   └── assignments/
-│       │       ├── page.tsx                    (dashboard — empty + filled state)
-│       │       ├── create/page.tsx             (create assignment form)
-│       │       └── [id]/page.tsx               (output exam paper)
-│       ├── components/
-│       │   ├── layout/AppShell.tsx             (sidebar + mobile drawer + bottom nav)
-│       │   ├── layout/Sidebar.tsx
-│       │   ├── dashboard/EmptyState.tsx
-│       │   ├── dashboard/AssignmentCard.tsx
-│       │   ├── create/FileUpload.tsx           (drag & drop)
-│       │   ├── create/QuestionTypeRow.tsx      (dynamic +/- counters)
-│       │   ├── create/StepProgress.tsx
-│       │   ├── output/ExamPaper.tsx            (structured exam paper)
-│       │   ├── output/DifficultyBadge.tsx
-│       │   ├── output/PDFDocument.tsx          (react-pdf layout)
-│       │   └── output/PDFDownloadButton.tsx    (client-only PDF download)
-│       ├── store/assignmentStore.ts            (Zustand — form + generation state)
-│       ├── lib/api.ts                          (Axios API client)
-│       ├── lib/websocket.ts                    (WS singleton with reconnect)
-│       └── types/index.ts
+├── frontend/src/
+│   ├── app/
+│   │   ├── assignments/page.tsx          # Dashboard (empty + filled state)
+│   │   ├── assignments/create/page.tsx   # Create assignment form
+│   │   └── assignments/[id]/page.tsx     # Output exam paper
+│   ├── components/
+│   │   ├── layout/       AppShell, Sidebar (mobile drawer + bottom nav)
+│   │   ├── dashboard/    EmptyState, AssignmentCard
+│   │   ├── create/       FileUpload, QuestionTypeRow, StepProgress
+│   │   └── output/       ExamPaper, DifficultyBadge, PDFDocument, PDFDownloadButton
+│   ├── store/            assignmentStore.ts  (Zustand)
+│   ├── lib/              api.ts, websocket.ts
+│   └── types/            index.ts
 │
-└── backend/
-    └── src/
-        ├── index.ts                            (Express + WebSocket server)
-        ├── models/Assignment.ts                (Mongoose model)
-        ├── routes/assignments.ts               (REST API + multer file upload)
-        ├── queues/index.ts                     (BullMQ queue setup)
-        ├── workers/generationWorker.ts         (BullMQ worker — AI generation)
-        ├── services/aiService.ts               (Groq API + Zod validation)
-        ├── services/websocketService.ts        (WS subscription + broadcast)
-        └── types/index.ts                      (Zod schemas + shared types)
+└── backend/src/
+    ├── index.ts                  Express + WebSocket server
+    ├── models/Assignment.ts      Mongoose model
+    ├── routes/assignments.ts     REST API
+    ├── queues/index.ts           BullMQ setup
+    ├── workers/generationWorker  BullMQ worker (AI generation)
+    ├── services/aiService.ts     Groq API + Zod validation
+    ├── services/websocketService WebSocket subscriptions + broadcast
+    └── types/index.ts            Zod schemas + shared types
 ```
 
 ---
 
 ## API Reference
 
-| Method | Path | Description |
+| Method | Endpoint | Description |
 |---|---|---|
-| `POST` | `/api/assignments` | Create assignment + enqueue generation |
+| `POST` | `/api/assignments` | Create assignment + enqueue AI generation |
 | `GET` | `/api/assignments` | List all assignments |
-| `GET` | `/api/assignments/:id` | Get single assignment with generated paper |
+| `GET` | `/api/assignments/:id` | Get assignment with generated paper |
 | `DELETE` | `/api/assignments/:id` | Delete assignment |
 | `POST` | `/api/assignments/:id/regenerate` | Re-queue AI generation |
 | `GET` | `/health` | Health check |
 
 ### WebSocket Protocol
 
-Connect to `ws://localhost:4000`
-
 ```json
-// Client → Server (subscribe)
-{ "type": "subscribe", "assignmentId": "..." }
+// Subscribe to job updates
+{ "type": "subscribe", "assignmentId": "abc123" }
 
-// Server → Client (update)
-{ "type": "status_update", "assignmentId": "...", "status": "done", "data": { ...GeneratedPaper } }
+// Receive status updates
+{ "type": "status_update", "status": "processing", "assignmentId": "abc123" }
+{ "type": "status_update", "status": "done", "assignmentId": "abc123", "data": { ...GeneratedPaper } }
 ```
 
-Status values: `queued` → `processing` → `done` | `error`
+Status flow: `queued` → `processing` → `done` | `error`
 
 ---
 
-## Design Decisions
+## Key Design Decisions
 
-### Why Groq + Llama 3.3 70B?
-Fast, free tier available, and strong at structured JSON output. The prompt instructs the model to return a strict schema which is then validated with Zod before touching the database or frontend — raw AI output is never rendered directly.
+**Why async job queue?**
+AI generation takes 10–30 seconds. BullMQ decouples the HTTP request from the slow work — the API responds instantly with an ID, the worker runs asynchronously, and WebSocket delivers the result live. Includes retry logic (3 attempts, exponential backoff).
 
-### Why BullMQ?
-AI generation takes 10–30 seconds. BullMQ decouples the HTTP request from the slow work — the API responds instantly with an assignment ID, the worker processes asynchronously, and WebSocket delivers the result in real time. Includes retry logic (3 attempts with exponential backoff).
+**Why Zod for AI output?**
+LLMs can hallucinate structure. Every response is parsed and validated against a strict Zod schema before it touches the database or frontend. Raw AI output is never rendered directly.
 
-### Why Zustand over Redux?
-Same capabilities with 80% less boilerplate. The store manages both the form state and generation status cleanly without reducers/actions/selectors overhead.
+**Why Groq over OpenAI?**
+Free tier, fast inference (~3–5s for 70B), and `llama-3.3-70b-versatile` is strong at following structured JSON instructions.
 
-### PDF Export
-`@react-pdf/renderer` generates real PDFs with proper typography and layout — not an HTML print. Runs entirely client-side via a dynamically imported component (avoids SSR issues).
+**Why Zustand over Redux?**
+Same reactivity and devtools support, without reducers/actions/selectors boilerplate. The store cleanly manages both form state and generation status in one place.
 
-### WebSocket Resilience
-The WS client reconnects automatically on disconnect, queues subscriptions that arrive before the connection is open, and the frontend also polls every 5 seconds as a fallback.
+---
+
+<div align="center">
+
+Built for VedaAI Full Stack Engineering Assignment
+
+</div>
