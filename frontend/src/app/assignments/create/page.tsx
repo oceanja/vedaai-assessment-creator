@@ -82,7 +82,7 @@ export default function CreateAssignmentPage() {
         <form 
           onSubmit={handleSubmit} 
           noValidate
-          className="bg-[#f3f3f3] border-[2.5px] border-[#8b5cf6] rounded-[14px] m-[12px] flex-1 flex flex-col overflow-hidden min-h-0 relative max-w-[800px] w-full"
+          className="bg-[#f3f3f3] rounded-[14px] m-[12px] flex-1 flex flex-col overflow-hidden min-h-0 relative max-w-[800px] w-full"
         >
           <div className="px-[24px] pt-[16px] pb-0">
             <div className="flex items-center gap-[8px] mb-[3px]">
