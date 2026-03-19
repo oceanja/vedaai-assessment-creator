@@ -2,28 +2,29 @@ import { Queue, QueueEvents } from "bullmq";
 
 const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
 
-// Parse redis URL into host/port/password for BullMQ connection config
-function parseRedisUrl(url: string) {
-  const parsed = new URL(url);
-  const config: { host: string; port: number; password?: string; username?: string; tls?: object } = {
-    host: parsed.hostname || "localhost",
-    port: parseInt(parsed.port || "6379", 10),
-  };
-  if (parsed.password) config.password = decodeURIComponent(parsed.password);
-  if (parsed.username && parsed.username !== "default") config.username = parsed.username;
-  if (parsed.protocol === "rediss:") config.tls = {};
-  return config;
+function getRedisConfig(url: string) {
+  try {
+    const u = new URL(url);
+    const isTLS = u.protocol === "rediss:";
+    return {
+      host: u.hostname,
+      port: u.port ? parseInt(u.port) : (isTLS ? 6380 : 6379),
+      password: u.password ? decodeURIComponent(u.password) : undefined,
+      username: u.username && u.username !== "default" ? u.username : undefined,
+      tls: isTLS ? { rejectUnauthorized: false } : undefined,
+      maxRetriesPerRequest: null as null,
+      enableReadyCheck: false,
+    };
+  } catch {
+    return { host: "localhost", port: 6379, maxRetriesPerRequest: null as null, enableReadyCheck: false };
+  }
 }
 
-const connectionConfig = parseRedisUrl(REDIS_URL);
-
-// ─── Queue names ──────────────────────────────────────────────────────────────
+const connectionConfig = getRedisConfig(REDIS_URL);
 
 export const QUEUE_NAMES = {
   GENERATION: "assignment-generation",
 } as const;
-
-// ─── Generation queue ─────────────────────────────────────────────────────────
 
 export const generationQueue = new Queue(QUEUE_NAMES.GENERATION, {
   connection: connectionConfig,
@@ -36,10 +37,8 @@ export const generationQueue = new Queue(QUEUE_NAMES.GENERATION, {
 });
 
 export const generationQueueEvents = new QueueEvents(QUEUE_NAMES.GENERATION, {
-  connection: connectionConfig,
+  connection: getRedisConfig(REDIS_URL),
 });
-
-// ─── Job types ────────────────────────────────────────────────────────────────
 
 export interface GenerationJobData {
   assignmentId: string;
