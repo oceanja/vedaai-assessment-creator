@@ -2,13 +2,17 @@ import { Queue, QueueEvents } from "bullmq";
 
 const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
 
-// Parse redis URL into host/port for BullMQ connection config
+// Parse redis URL into host/port/password for BullMQ connection config
 function parseRedisUrl(url: string) {
   const parsed = new URL(url);
-  return {
+  const config: { host: string; port: number; password?: string; username?: string; tls?: object } = {
     host: parsed.hostname || "localhost",
     port: parseInt(parsed.port || "6379", 10),
   };
+  if (parsed.password) config.password = decodeURIComponent(parsed.password);
+  if (parsed.username && parsed.username !== "default") config.username = parsed.username;
+  if (parsed.protocol === "rediss:") config.tls = {};
+  return config;
 }
 
 const connectionConfig = parseRedisUrl(REDIS_URL);

@@ -9,7 +9,14 @@ import { notifyAssignmentUpdate } from "../services/websocketService";
 const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
 function parseRedisUrl(url: string) {
   const parsed = new URL(url);
-  return { host: parsed.hostname || "localhost", port: parseInt(parsed.port || "6379", 10) };
+  const config: { host: string; port: number; password?: string; username?: string; tls?: object } = {
+    host: parsed.hostname || "localhost",
+    port: parseInt(parsed.port || "6379", 10),
+  };
+  if (parsed.password) config.password = decodeURIComponent(parsed.password);
+  if (parsed.username && parsed.username !== "default") config.username = parsed.username;
+  if (parsed.protocol === "rediss:") config.tls = {};
+  return config;
 }
 const connectionConfig = parseRedisUrl(REDIS_URL);
 
