@@ -2,7 +2,6 @@ import { Router, Request, Response } from "express";
 import multer from "multer";
 import path from "path";
 import { Assignment } from "../models/Assignment";
-import { generationQueue } from "../queues";
 import { generateQuestionPaper } from "../services/aiService";
 import type { AssignmentFormData, QuestionTypeRow } from "../types";
 
@@ -120,51 +119,32 @@ router.post(
         schoolName: formData.schoolName,
         dueDate: formData.dueDate,
         assignedDate: formatDate(new Date()),
-        status: "queued",
+        status: "processing",
         formData,
       });
 
       const assignmentId = assignment._id.toString();
 
-      // Try to enqueue in Redis; if Redis is down, process synchronously
-      let useSync = false;
-      try {
-        await generationQueue.add(
-          "generate",
-          { assignmentId },
-          { jobId: assignmentId }
-        );
-      } catch (queueErr) {
-        console.warn("[POST /assignments] Redis queue unavailable, processing synchronously:", (queueErr as Error).message);
-        useSync = true;
-      }
-
-      // Respond immediately so frontend can navigate
+      // Respond immediately so frontend can navigate to detail page
       res.status(201).json({
         success: true,
-        data: {
-          assignmentId,
-          status: useSync ? "processing" : "queued",
-        },
+        data: { assignmentId, status: "processing" },
       });
 
-      // If Redis failed, process in the background of this request
-      if (useSync) {
-        (async () => {
-          try {
-            await Assignment.findByIdAndUpdate(assignmentId, { status: "processing" });
-            const generatedPaper = await generateQuestionPaper(formData);
-            await Assignment.findByIdAndUpdate(assignmentId, { status: "done", generatedPaper });
-            console.log(`[Sync] Done — assignment ${assignmentId}`);
-          } catch (syncErr) {
-            console.error(`[Sync] Failed — assignment ${assignmentId}:`, syncErr);
-            await Assignment.findByIdAndUpdate(assignmentId, {
-              status: "error",
-              errorMessage: (syncErr as Error).message,
-            });
-          }
-        })();
-      }
+      // Process AI generation in background (no Redis needed)
+      (async () => {
+        try {
+          const generatedPaper = await generateQuestionPaper(formData);
+          await Assignment.findByIdAndUpdate(assignmentId, { status: "done", generatedPaper });
+          console.log(`[Generate] Done — ${assignmentId}`);
+        } catch (err) {
+          console.error(`[Generate] Failed — ${assignmentId}:`, err);
+          await Assignment.findByIdAndUpdate(assignmentId, {
+            status: "error",
+            errorMessage: (err as Error).message,
+          });
+        }
+      })();
     } catch (err) {
       console.error("[POST /assignments]", err);
       res.status(500).json({ success: false, error: "Internal server error" });
@@ -233,41 +213,27 @@ router.post("/:id/regenerate", async (req: Request, res: Response): Promise<void
     const assignmentId = req.params.id;
 
     await Assignment.findByIdAndUpdate(assignmentId, {
-      status: "queued",
+      status: "processing",
       generatedPaper: undefined,
       errorMessage: undefined,
     });
 
-    let useSync = false;
-    try {
-      await generationQueue.add(
-        "generate",
-        { assignmentId },
-        { jobId: `${assignmentId}-regen-${Date.now()}` }
-      );
-    } catch {
-      console.warn("[Regenerate] Redis unavailable, processing synchronously");
-      useSync = true;
-    }
-
     res.json({ success: true, data: null });
 
-    if (useSync) {
-      (async () => {
-        try {
-          await Assignment.findByIdAndUpdate(assignmentId, { status: "processing" });
-          const generatedPaper = await generateQuestionPaper(assignment.formData);
-          await Assignment.findByIdAndUpdate(assignmentId, { status: "done", generatedPaper });
-          console.log(`[Sync] Regenerated — assignment ${assignmentId}`);
-        } catch (syncErr) {
-          console.error(`[Sync] Regenerate failed — ${assignmentId}:`, syncErr);
-          await Assignment.findByIdAndUpdate(assignmentId, {
-            status: "error",
-            errorMessage: (syncErr as Error).message,
-          });
-        }
-      })();
-    }
+    // Process AI generation in background (no Redis needed)
+    (async () => {
+      try {
+        const generatedPaper = await generateQuestionPaper(assignment.formData);
+        await Assignment.findByIdAndUpdate(assignmentId, { status: "done", generatedPaper });
+        console.log(`[Regenerate] Done — ${assignmentId}`);
+      } catch (err) {
+        console.error(`[Regenerate] Failed — ${assignmentId}:`, err);
+        await Assignment.findByIdAndUpdate(assignmentId, {
+          status: "error",
+          errorMessage: (err as Error).message,
+        });
+      }
+    })();
   } catch (err) {
     console.error("[POST /assignments/:id/regenerate]", err);
     res.status(500).json({ success: false, error: "Internal server error" });
