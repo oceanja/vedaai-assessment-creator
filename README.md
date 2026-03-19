@@ -16,6 +16,14 @@ An AI-powered question paper generator for teachers. Create structured exam pape
 
 ---
 
+## Demo
+
+[Watch Demo Video](https://drive.google.com/file/d/1bGe5L6QI3QjKDRcI55ixvLKGDTulyY4H/view?usp=sharing)
+
+> **Note:** In the demo video, Multiple Choice Questions appear without answer options. This has since been fixed — MCQ questions now correctly display A) B) C) D) options beneath each question.
+
+---
+
 ## Screenshots
 
 | Dashboard | Create Assignment | Exam Paper Output |

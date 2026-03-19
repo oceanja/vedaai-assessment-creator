@@ -52,6 +52,7 @@ export interface GeneratedQuestion {
   text: string;
   difficulty: Difficulty;
   marks: number;
+  options?: string[];
 }
 
 export interface GeneratedSection {

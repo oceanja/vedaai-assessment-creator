@@ -91,6 +91,16 @@ export default function ExamPaper({ paper, printRef }: ExamPaperProps) {
 
                   <div className="flex-1 min-w-0">
                     <p className="text-sm leading-relaxed text-gray-800 mb-2">{q.text}</p>
+                    {q.options && q.options.length > 0 && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 mb-2 pl-1">
+                        {q.options.map((opt, oIdx) => (
+                          <div key={oIdx} className="flex items-start gap-2 text-sm text-gray-700 bg-gray-50 rounded-lg px-3 py-1.5 border border-gray-100">
+                            <span className="font-medium text-gray-500 shrink-0">{opt.slice(0, 2)}</span>
+                            <span>{opt.slice(3)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                     <div className="flex items-center gap-2 flex-wrap">
                       <DifficultyBadge difficulty={q.difficulty} />
                       <span className="text-xs text-gray-400 font-medium">

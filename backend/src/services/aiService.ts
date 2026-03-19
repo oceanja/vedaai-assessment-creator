@@ -37,7 +37,9 @@ IMPORTANT RULES:
 1. Questions must be academically appropriate for ${className} students studying ${subject}
 2. Distribute difficulty: roughly 40% easy, 40% medium, 20% hard per section
 3. Each question must be clear, unambiguous, and educational
-4. Return ONLY valid JSON, no markdown, no explanation, no code fences
+4. For Multiple Choice Questions, always include an "options" array with exactly 4 choices formatted as ["A) ...", "B) ...", "C) ...", "D) ..."]
+5. For all other question types (short, long, diagram, numerical etc.), do NOT include "options"
+6. Return ONLY valid JSON, no markdown, no explanation, no code fences
 
 Return a JSON object matching EXACTLY this structure:
 {
@@ -57,7 +59,8 @@ Return a JSON object matching EXACTLY this structure:
           "id": number,
           "text": string,
           "difficulty": "easy" | "medium" | "hard",
-          "marks": number
+          "marks": number,
+          "options": ["A) ...", "B) ...", "C) ...", "D) ..."] // ONLY include for Multiple Choice questions, omit for all other types
         }
       ]
     }

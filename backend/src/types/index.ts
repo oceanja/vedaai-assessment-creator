@@ -22,6 +22,7 @@ export const GeneratedQuestionSchema = z.object({
   text: z.string().min(1),
   difficulty: DifficultySchema,
   marks: z.number().positive(),
+  options: z.array(z.string()).optional(),
 });
 
 export const GeneratedSectionSchema = z.object({
