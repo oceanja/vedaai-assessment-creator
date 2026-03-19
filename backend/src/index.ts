@@ -21,7 +21,10 @@ const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
 const app = express();
 
 app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
-app.use(cors({ origin: FRONTEND_URL, credentials: true }));
+app.use(cors({
+  origin: [FRONTEND_URL, "http://localhost:3000", /\.vercel\.app$/],
+  credentials: true,
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
