@@ -62,7 +62,11 @@ export function notifyAssignmentUpdate(
 
   clients.forEach((client) => {
     if (client.readyState === WebSocket.OPEN) {
-      client.send(payload);
+      try {
+        client.send(payload);
+      } catch (err) {
+        console.error("[WS] Failed to send message:", err);
+      }
     }
   });
 }

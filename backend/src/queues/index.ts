@@ -40,6 +40,14 @@ export const generationQueueEvents = new QueueEvents(QUEUE_NAMES.GENERATION, {
   connection: getRedisConfig(REDIS_URL),
 });
 
+generationQueue.on("error", (err) => {
+  console.error("[Queue] Redis Connection error:", err.message);
+});
+
+generationQueueEvents.on("error", (err) => {
+  console.error("[QueueEvents] Redis Connection error:", err.message);
+});
+
 export interface GenerationJobData {
   assignmentId: string;
 }

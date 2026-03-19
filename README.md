@@ -13,9 +13,7 @@
 [![Redis](https://img.shields.io/badge/Redis-DC382D?style=flat-square&logo=redis&logoColor=white)](https://redis.io)
 [![BullMQ](https://img.shields.io/badge/BullMQ-FF6B6B?style=flat-square&logo=bull&logoColor=white)](https://docs.bullmq.io)
 
-[**▶ Watch Demo**](https://drive.google.com/file/d/1bGe5L6QI3QjKDRcI55ixvLKGDTulyY4H/view?usp=sharing)
-
-> **Note:** In the demo video, MCQ options are not visible — this has since been fixed. MCQs now correctly display A) B) C) D) options beneath each question.
+[**▶ Watch Demo**](https://drive.google.com/file/d/1GQH6q1ro1ln3F_l86R3XIJ7ydhIRmlW0/view?usp=sharing)
 
 </div>
 

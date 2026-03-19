@@ -2,9 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Mic, CalendarPlus, Sparkles } from "lucide-react";
 import AppShell from "@/components/layout/AppShell";
-import StepProgress from "@/components/create/StepProgress";
 import FileUpload from "@/components/create/FileUpload";
 import QuestionTypeRow from "@/components/create/QuestionTypeRow";
 import { useAssignmentStore } from "@/store/assignmentStore";
@@ -31,7 +29,7 @@ export default function CreateAssignmentPage() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => { resetForm(); }, []);
+  useEffect(() => { resetForm(); }, [resetForm]);
 
   function validate(): boolean {
     const e: FormErrors = {};
@@ -80,203 +78,197 @@ export default function CreateAssignmentPage() {
 
   return (
     <AppShell breadcrumb="Assignment">
-      <div className="max-w-2xl mx-auto fade-in">
-        {/* Header */}
-        <div className="mb-5">
-          <div className="flex items-center gap-2 mb-1">
-            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <h1 className="text-xl md:text-2xl font-bold text-gray-900">Create Assignment</h1>
+      <div className="bg-[#e8e8e8] flex items-start justify-center p-0 flex-1 overflow-y-auto">
+        <form 
+          onSubmit={handleSubmit} 
+          noValidate
+          className="bg-[#f3f3f3] border-[2.5px] border-[#8b5cf6] rounded-[14px] m-[12px] flex-1 flex flex-col overflow-hidden min-h-0 relative max-w-[800px] w-full"
+        >
+          <div className="px-[24px] pt-[16px] pb-0">
+            <div className="flex items-center gap-[8px] mb-[3px]">
+              <div className="w-[9px] h-[9px] rounded-full bg-[#22c55e]"></div>
+              <div className="text-[19px] font-[700] text-[#1a1a1a]">Create Assignment</div>
+            </div>
+            <div className="text-[12.5px] text-[#888] mb-[12px]">Set up a new assignment for your students</div>
           </div>
-          <p className="text-sm text-gray-500 ml-4">Set up a new assignment for your students</p>
-        </div>
-
-        <StepProgress currentStep={1} totalSteps={1} />
-
-        <form onSubmit={handleSubmit} noValidate>
-          <div className="card space-y-5">
-            {/* Section header */}
-            <div className="flex items-start gap-3 pb-2 border-b border-gray-50">
-              <div className="w-9 h-9 rounded-xl bg-brand-orange/10 flex items-center justify-center shrink-0">
-                <Sparkles size={16} className="text-brand-orange" />
-              </div>
-              <div>
-                <h2 className="text-base font-semibold text-gray-800">Assignment Details</h2>
-                <p className="text-xs text-gray-400">Basic information about your assignment</p>
-              </div>
+          
+          <div className="px-[24px] mb-[0]">
+            <div className="h-[4px] bg-[#ddd] rounded-[2px] overflow-hidden">
+              <div className="h-full w-1/2 bg-[#1a1a1a] rounded-[2px] transition-all duration-500"></div>
             </div>
+          </div>
 
-            {/* Title */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Assignment Title <span className="text-red-400">*</span>
-              </label>
-              <input
-                type="text" value={formData.title}
-                onChange={(e) => setFormField("title", e.target.value)}
-                placeholder="e.g. Quiz on Electricity"
-                className={`input-field ${errors.title ? "border-red-300 focus:border-red-400 focus:ring-red-100" : ""}`}
-              />
-              {errors.title && <p className="text-xs text-red-500 mt-1">{errors.title}</p>}
-            </div>
+          <div className="flex-1 overflow-y-auto px-[24px] pt-[16px] pb-[20px] [&::-webkit-scrollbar]:w-[5px] [&::-webkit-scrollbar-thumb]:bg-[#ddd] [&::-webkit-scrollbar-thumb]:rounded-[3px]">
+            <div className="bg-white rounded-[14px] p-[22px]">
+              <div className="text-[16px] font-[700] text-[#1a1a1a] mb-[3px]">Assignment Details</div>
+              <div className="text-[12.5px] text-[#888] mb-[16px]">Basic information about your assignment</div>
 
-            {/* Subject + Class */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Subject <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="text" value={formData.subject}
-                  onChange={(e) => setFormField("subject", e.target.value)}
-                  placeholder="e.g. Science"
-                  className={`input-field ${errors.subject ? "border-red-300" : ""}`}
-                />
-                {errors.subject && <p className="text-xs text-red-500 mt-1">{errors.subject}</p>}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Class <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="text" value={formData.className}
-                  onChange={(e) => setFormField("className", e.target.value)}
-                  placeholder="e.g. Grade 8"
-                  className={`input-field ${errors.className ? "border-red-300" : ""}`}
-                />
-                {errors.className && <p className="text-xs text-red-500 mt-1">{errors.className}</p>}
-              </div>
-            </div>
-
-            {/* School */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">School Name</label>
-              <input
-                type="text" value={formData.schoolName}
-                onChange={(e) => setFormField("schoolName", e.target.value)}
-                placeholder="e.g. Delhi Public School"
-                className="input-field"
-              />
-            </div>
-
-            {/* File upload */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Upload Material <span className="text-gray-400 font-normal">(optional)</span>
-              </label>
               <FileUpload file={formData.uploadedFile} onChange={(f) => setFormField("uploadedFile", f)} />
-              <p className="text-xs text-gray-400 mt-1.5 text-center">
-                Upload reference images or documents to guide AI generation
-              </p>
-            </div>
 
-            {/* Due Date + Time */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Due Date <span className="text-red-400">*</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type="date" value={formData.dueDate}
-                    onChange={(e) => setFormField("dueDate", e.target.value)}
-                    className={`input-field pr-10 ${errors.dueDate ? "border-red-300" : ""}`}
-                    min={new Date().toISOString().split("T")[0]}
-                  />
-                  <CalendarPlus size={15} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-[16px]">
+                <div>
+                  <div className="text-[13.5px] font-[600] text-[#1a1a1a] mb-[8px]">
+                    Assignment Title {errors.title && <span className="text-red-500 font-normal">({errors.title})</span>}
+                  </div>
+                  <div className={`flex items-center border ${errors.title ? "border-red-400" : "border-[#e0e0e0]"} rounded-[9px] px-[14px] py-[10px] bg-white mb-[18px]`}>
+                    <input 
+                      type="text" 
+                      value={formData.title}
+                      onChange={(e) => setFormField("title", e.target.value)}
+                      placeholder="e.g. Quiz on Electricity" 
+                      className="flex-1 border-none outline-none text-[13px] text-[#333] bg-transparent placeholder:text-[#bbb]" 
+                    />
+                  </div>
                 </div>
-                {errors.dueDate && <p className="text-xs text-red-500 mt-1">{errors.dueDate}</p>}
+
+                <div>
+                  <div className="text-[13.5px] font-[600] text-[#1a1a1a] mb-[8px]">
+                    Subject {errors.subject && <span className="text-red-500 font-normal">({errors.subject})</span>}
+                  </div>
+                  <div className={`flex items-center border ${errors.subject ? "border-red-400" : "border-[#e0e0e0]"} rounded-[9px] px-[14px] py-[10px] bg-white mb-[18px]`}>
+                    <input 
+                      type="text" 
+                      value={formData.subject}
+                      onChange={(e) => setFormField("subject", e.target.value)}
+                      placeholder="e.g. Science" 
+                      className="flex-1 border-none outline-none text-[13px] text-[#333] bg-transparent placeholder:text-[#bbb]" 
+                    />
+                  </div>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Time Allowed</label>
-                <input
-                  type="text" value={formData.timeAllowed}
-                  onChange={(e) => setFormField("timeAllowed", e.target.value)}
-                  placeholder="e.g. 3 hours"
-                  className="input-field"
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-[16px]">
+                <div>
+                  <div className="text-[13.5px] font-[600] text-[#1a1a1a] mb-[8px]">
+                    Class {errors.className && <span className="text-red-500 font-normal">({errors.className})</span>}
+                  </div>
+                  <div className={`flex items-center border ${errors.className ? "border-red-400" : "border-[#e0e0e0]"} rounded-[9px] px-[14px] py-[10px] bg-white mb-[18px]`}>
+                    <input 
+                      type="text" 
+                      value={formData.className}
+                      onChange={(e) => setFormField("className", e.target.value)}
+                      placeholder="e.g. Grade 8" 
+                      className="flex-1 border-none outline-none text-[13px] text-[#333] bg-transparent placeholder:text-[#bbb]" 
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-[13.5px] font-[600] text-[#1a1a1a] mb-[8px]">
+                    School Name
+                  </div>
+                  <div className="flex items-center border border-[#e0e0e0] rounded-[9px] px-[14px] py-[10px] bg-white mb-[18px]">
+                    <input 
+                      type="text" 
+                      value={formData.schoolName}
+                      onChange={(e) => setFormField("schoolName", e.target.value)}
+                      placeholder="e.g. Delhi Public School" 
+                      className="flex-1 border-none outline-none text-[13px] text-[#333] bg-transparent placeholder:text-[#bbb]" 
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-[16px]">
+                <div>
+                  <div className="text-[13.5px] font-[600] text-[#1a1a1a] mb-[8px]">
+                    Due Date {errors.dueDate && <span className="text-red-500 font-normal">({errors.dueDate})</span>}
+                  </div>
+                  <div className={`flex items-center border ${errors.dueDate ? "border-red-400" : "border-[#e0e0e0]"} rounded-[9px] px-[14px] py-[10px] bg-white mb-[18px]`}>
+                    <input 
+                      type="date" 
+                      value={formData.dueDate}
+                      onChange={(e) => setFormField("dueDate", e.target.value)}
+                      min={new Date().toISOString().split("T")[0]}
+                      className="flex-1 border-none outline-none text-[13px] text-[#333] bg-transparent placeholder:text-[#bbb]" 
+                    />
+                    <button type="button" className="bg-transparent border-none cursor-pointer p-0 flex items-center shrink-0 ml-[8px]">
+                      <svg viewBox="0 0 24 24" className="w-[17px] h-[17px] stroke-[#555] fill-none stroke-[1.8]"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[13.5px] font-[600] text-[#1a1a1a] mb-[8px]">
+                    Time Allowed
+                  </div>
+                  <div className="flex items-center border border-[#e0e0e0] rounded-[9px] px-[14px] py-[10px] bg-white mb-[18px]">
+                    <input 
+                      type="text" 
+                      value={formData.timeAllowed}
+                      onChange={(e) => setFormField("timeAllowed", e.target.value)}
+                      placeholder="e.g. 3 hours" 
+                      className="flex-1 border-none outline-none text-[13px] text-[#333] bg-transparent placeholder:text-[#bbb]" 
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-[13.5px] font-[600] text-[#1a1a1a] mb-[8px]">Question Type {errors.questionTypes && <span className="text-red-500 font-normal">({errors.questionTypes})</span>}</div>
+              <div className="grid gap-[8px] pb-[6px] mb-[4px]" style={{ gridTemplateColumns: "1fr 130px 90px" }}>
+                <div className="text-[12.5px] font-[600] text-[#1a1a1a]"></div>
+                <div className="text-[12.5px] font-[600] text-[#1a1a1a] text-center w-full">No. of Questions</div>
+                <div className="text-[12.5px] font-[600] text-[#1a1a1a] text-center w-full">Marks</div>
+              </div>
+
+              {formData.questionTypes.map((row) => (
+                <QuestionTypeRow
+                  key={row.id} row={row}
+                  onUpdate={updateQuestionType} onRemove={removeQuestionType}
+                  canRemove={formData.questionTypes.length > 1}
                 />
-              </div>
-            </div>
-
-            {/* Question Types */}
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-semibold text-gray-800">Question Types</span>
-                <div className="hidden sm:flex gap-8 text-xs text-gray-400 font-medium pr-8">
-                  <span>Questions</span>
-                  <span>Marks each</span>
-                </div>
-              </div>
-
-              {errors.questionTypes && (
-                <div className="text-xs text-red-500 mb-2 bg-red-50 border border-red-100 px-3 py-2 rounded-xl">
-                  {errors.questionTypes}
-                </div>
-              )}
-
-              <div className="divide-y divide-gray-50 bg-gray-50/50 rounded-xl px-3">
-                {formData.questionTypes.map((row) => (
-                  <QuestionTypeRow
-                    key={row.id} row={row}
-                    onUpdate={updateQuestionType} onRemove={removeQuestionType}
-                    canRemove={formData.questionTypes.length > 1}
-                  />
-                ))}
-              </div>
+              ))}
 
               <button
                 type="button" onClick={addQuestionType}
-                className="mt-3 flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-brand-orange transition-colors group"
+                className="flex items-center gap-[8px] bg-transparent border-none cursor-pointer py-[6px] mt-[4px] mb-[14px] px-0"
               >
-                <div className="w-6 h-6 rounded-full bg-gray-100 group-hover:bg-orange-50 flex items-center justify-center transition-colors">
-                  <Plus size={13} className="group-hover:text-brand-orange transition-colors" />
+                <div className="w-[26px] h-[26px] rounded-full bg-[#1a1a1a] flex items-center justify-center">
+                  <svg viewBox="0 0 24 24" className="w-[14px] h-[14px] stroke-white fill-none stroke-[3]"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 </div>
-                Add Question Type
+                <span className="text-[13.5px] font-[600] text-[#1a1a1a]">Add Question Type</span>
               </button>
 
-              {/* Totals */}
-              <div className="mt-4 pt-4 border-t border-gray-100 flex justify-end gap-4 md:gap-6">
-                <div className="text-center">
-                  <p className="text-lg font-bold text-gray-900">{totalQuestions()}</p>
-                  <p className="text-xs text-gray-400">Total Questions</p>
-                </div>
-                <div className="w-px bg-gray-100" />
-                <div className="text-center">
-                  <p className="text-lg font-bold text-brand-orange">{totalMarks()}</p>
-                  <p className="text-xs text-gray-400">Total Marks</p>
-                </div>
+              <div className="text-right text-[13px] text-[#555] mb-[18px] leading-[1.7]">
+                Total Questions : <b className="text-[#1a1a1a] font-[600]">{totalQuestions()}</b><br />
+                Total Marks : <b className="text-[#1a1a1a] font-[600]">{totalMarks()}</b>
               </div>
-            </div>
 
-            {/* Additional instructions */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Additional Information{" "}
-                <span className="text-gray-400 font-normal">(For better AI output)</span>
-              </label>
-              <div className="relative">
-                <textarea
-                  value={formData.additionalInstructions}
-                  onChange={(e) => setFormField("additionalInstructions", e.target.value)}
-                  placeholder="e.g. Generate a question paper for 3 hour exam duration, focus on NCERT chapters..."
-                  rows={4}
-                  className="input-field resize-none pr-10"
-                />
-                <Mic size={15} className="absolute right-3 bottom-3 text-gray-400 cursor-pointer hover:text-brand-orange transition-colors" />
+              <div className="mt-[18px]">
+                <div className="text-[14px] font-[600] text-[#1a1a1a] mb-[10px]">Additional Information (For better output)</div>
+                <div className="relative">
+                  <textarea
+                    value={formData.additionalInstructions}
+                    onChange={(e) => setFormField("additionalInstructions", e.target.value)}
+                    className="w-full border border-[#e0e0e0] rounded-[10px] py-[13px] px-[14px] pr-[40px] text-[13px] text-[#555] bg-white resize-none outline-none min-h-[80px] font-sans placeholder:text-[#bbb]"
+                    rows={3} 
+                    placeholder="e.g Generate a question paper for 3 hour exam duration..."
+                  />
+                  <button type="button" className="absolute bottom-[12px] right-[12px] bg-transparent border-none cursor-pointer p-0 flex items-center">
+                    <svg viewBox="0 0 24 24" className="w-[17px] h-[17px] stroke-[#555] fill-none stroke-[1.8]"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                  </button>
+                </div>
               </div>
+
             </div>
           </div>
 
-          {/* Navigation */}
-          <div className="flex items-center justify-between mt-5">
-            <button type="button" onClick={() => router.push("/assignments")} className="btn-secondary">
-              ← Previous
+          {/* Footer Buttons */}
+          <div className="px-[24px] py-[14px] flex items-center justify-between bg-[#f3f3f3] border-t border-[#e8e8e8]">
+            <button
+              type="button" 
+              onClick={() => router.push("/assignments")} 
+              className="flex items-center gap-[6px] bg-white border-[1.5px] border-[#ddd] rounded-[24px] px-[22px] py-[10px] text-[13.5px] font-[600] text-[#333] cursor-pointer hover:bg-[#f5f5f5]"
+            >
+              <svg viewBox="0 0 24 24" className="w-[15px] h-[15px] stroke-current fill-none stroke-[2.5]"><polyline points="15 18 9 12 15 6"/></svg>
+              Previous
             </button>
-            <button type="submit" disabled={submitting} className="btn-orange min-w-[140px] justify-center">
-              {submitting ? (
-                <><span className="spinner" /> Generating...</>
-              ) : (
-                <><Sparkles size={15} /> Generate Paper</>
-              )}
+            <button
+              type="submit" 
+              disabled={submitting} 
+              className="flex items-center gap-[6px] bg-[#1a1a1a] border-none rounded-[24px] px-[22px] py-[10px] text-[13.5px] font-[600] text-white cursor-pointer hover:bg-[#333] disabled:bg-[#555]"
+            >
+              {submitting ? "Generating..." : "Next"}
+              {!submitting && <svg viewBox="0 0 24 24" className="w-[15px] h-[15px] stroke-current fill-none stroke-[2.5]"><polyline points="9 18 15 12 9 6"/></svg>}
             </button>
           </div>
         </form>

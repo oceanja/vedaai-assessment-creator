@@ -10,12 +10,12 @@ const config: Config = {
     extend: {
       colors: {
         sidebar: {
-          bg: "#111827",
-          hover: "#1F2937",
-          active: "#374151",
-          border: "#1F2937",
-          text: "#9CA3AF",
-          textActive: "#F9FAFB",
+          bg: "#FFFFFF",
+          hover: "#F3F4F6",
+          active: "#F3F4F6",
+          border: "#E5E7EB",
+          text: "#4B5563",
+          textActive: "#111827",
         },
         brand: {
           orange: "#E07B39",

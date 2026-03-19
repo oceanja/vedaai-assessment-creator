@@ -1,6 +1,5 @@
 "use client";
 
-import { X, ChevronDown } from "lucide-react";
 import { QUESTION_TYPE_OPTIONS, type QuestionTypeOption } from "@/types";
 import type { QuestionTypeRow as QTRow } from "@/types";
 
@@ -11,31 +10,23 @@ interface QuestionTypeRowProps {
   canRemove: boolean;
 }
 
-function Counter({
-  value,
-  onChange,
-  min = 1,
-}: {
-  value: number;
-  onChange: (v: number) => void;
-  min?: number;
-}) {
+function Counter({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-0 border border-[#e0e0e0] rounded-[8px] overflow-hidden bg-white">
       <button
         type="button"
-        onClick={() => onChange(Math.max(min, value - 1))}
-        className="w-7 h-7 rounded-lg border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-100 hover:border-gray-300 text-lg leading-none transition-colors"
+        onClick={() => onChange(Math.max(1, value - 1))}
+        className="w-[28px] h-[36px] bg-transparent border-none cursor-pointer text-[16px] text-[#555] flex items-center justify-center hover:bg-[#f5f5f5]"
       >
         −
       </button>
-      <span className="w-8 text-center text-sm font-medium text-gray-700">
+      <div className="flex-1 text-center text-[13px] font-[500] text-[#1a1a1a] border-l border-r border-[#e8e8e8] h-[36px] leading-[36px] min-w-[30px]">
         {value}
-      </span>
+      </div>
       <button
         type="button"
         onClick={() => onChange(value + 1)}
-        className="w-7 h-7 rounded-lg border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-100 hover:border-gray-300 text-lg leading-none transition-colors"
+        className="w-[28px] h-[36px] bg-transparent border-none cursor-pointer text-[16px] text-[#555] flex items-center justify-center hover:bg-[#f5f5f5]"
       >
         +
       </button>
@@ -43,56 +34,36 @@ function Counter({
   );
 }
 
-export default function QuestionTypeRow({
-  row,
-  onUpdate,
-  onRemove,
-  canRemove,
-}: QuestionTypeRowProps) {
+export default function QuestionTypeRow({ row, onUpdate, onRemove, canRemove }: QuestionTypeRowProps) {
   return (
-    <div className="flex items-center gap-3 py-2">
-      {/* Type dropdown */}
-      <div className="flex-1 relative">
-        <select
-          value={row.type}
-          onChange={(e) =>
-            onUpdate(row.id, "type", e.target.value as QuestionTypeOption)
-          }
-          className="w-full appearance-none border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-700 outline-none focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/10 bg-white transition-all pr-8"
+    <div className="grid gap-[8px] items-center mb-[8px]" style={{ gridTemplateColumns: "1fr 130px 90px" }}>
+      <div className="flex items-center gap-[6px]">
+        <div className="flex flex-1 items-center border border-[#e0e0e0] rounded-[8px] py-[9px] px-[12px] bg-white gap-[6px]">
+          <select
+            value={row.type}
+            onChange={(e) => onUpdate(row.id, "type", e.target.value as QuestionTypeOption)}
+            className="flex-1 border-none outline-none text-[13px] text-[#333] bg-transparent appearance-none cursor-pointer"
+          >
+            {QUESTION_TYPE_OPTIONS.map((opt) => (
+              <option key={opt} value={opt}>{opt}</option>
+            ))}
+          </select>
+          <span className="shrink-0 pointer-events-none">
+            <svg viewBox="0 0 24 24" className="w-[14px] h-[14px] stroke-[#888] fill-none stroke-[2]"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={() => onRemove(row.id)}
+          disabled={!canRemove}
+          className="bg-transparent border-none cursor-pointer px-[4px] flex items-center disabled:opacity-30 disabled:cursor-not-allowed hover:text-red-500 transition-colors"
         >
-          {QUESTION_TYPE_OPTIONS.map((opt) => (
-            <option key={opt} value={opt}>
-              {opt}
-            </option>
-          ))}
-        </select>
-        <ChevronDown
-          size={14}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-        />
+          <svg viewBox="0 0 24 24" className="w-[14px] h-[14px] stroke-current fill-none stroke-[2.5]"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
       </div>
 
-      {/* No. of Questions */}
-      <Counter
-        value={row.count}
-        onChange={(v) => onUpdate(row.id, "count", v)}
-      />
-
-      {/* Marks */}
-      <Counter
-        value={row.marks}
-        onChange={(v) => onUpdate(row.id, "marks", v)}
-      />
-
-      {/* Remove */}
-      <button
-        type="button"
-        onClick={() => onRemove(row.id)}
-        disabled={!canRemove}
-        className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-      >
-        <X size={14} />
-      </button>
+      <Counter value={row.count} onChange={(v) => onUpdate(row.id, "count", v)} />
+      <Counter value={row.marks} onChange={(v) => onUpdate(row.id, "marks", v)} />
     </div>
   );
 }

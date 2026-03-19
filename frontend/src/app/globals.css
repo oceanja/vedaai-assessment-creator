@@ -7,6 +7,7 @@
   * { box-sizing: border-box; }
   html { font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
   body { background-color: #F3F4F6; color: #111827; }
+  input:focus, textarea:focus, select:focus, button:focus { outline: none; box-shadow: none; }
 }
 
 @layer components {

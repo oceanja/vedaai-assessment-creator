@@ -11,7 +11,7 @@ function buildPrompt(formData: AssignmentFormData): string {
   const sectionDetails = questionTypes
     .map(
       (qt, idx) =>
-        `Section ${SECTION_LABELS[idx]}: ${qt.type} — ${qt.count} questions, ${qt.marks} mark(s) each`
+        `Title: "Section ${SECTION_LABELS[idx]}" — Type: "${qt.type}" — ${qt.count} questions, ${qt.marks} mark(s) each`
     )
     .join("\n");
 
@@ -37,8 +37,34 @@ IMPORTANT RULES:
 1. Questions must be academically appropriate for ${className} students studying ${subject}
 2. Distribute difficulty: roughly 40% easy, 40% medium, 20% hard per section
 3. Each question must be clear, unambiguous, and educational
-4. For Multiple Choice Questions, always include an "options" array with exactly 4 choices formatted as ["A) ...", "B) ...", "C) ...", "D) ..."]
-5. For all other question types (short, long, diagram, numerical etc.), do NOT include "options"
+4. FORMAT RULES PER QUESTION TYPE (follow these strictly):
+
+   a) Multiple Choice Questions:
+      - "text" must contain ONLY the question (no options in text)
+      - "options" array is REQUIRED with exactly 4 choices: ["A) ...", "B) ...", "C) ...", "D) ..."]
+
+   b) True/False:
+      - "text" must contain the statement to evaluate
+      - "options" array is REQUIRED with exactly 2 choices: ["A) True", "B) False"]
+
+   c) Fill in the Blanks:
+      - "text" must include blank(s) shown as "______" (six underscores) where the answer goes
+      - Example: "The chemical formula of water is ______."
+      - Do NOT include "options"
+
+   d) Diagram/Graph-Based Questions:
+      - "text" should describe what to draw or label, e.g. "Draw a labelled diagram of..."
+      - Do NOT include "options"
+
+   e) Numerical Problems:
+      - "text" should include the full numerical problem with all given data
+      - Do NOT include "options"
+
+   f) Short Questions / Long Questions / Essay Questions:
+      - "text" should contain the full question
+      - Do NOT include "options"
+
+5. The Section "title" must strictly be "Section A", "Section B", etc. Do NOT include the question type in the title.
 6. Return ONLY valid JSON, no markdown, no explanation, no code fences
 
 Return a JSON object matching EXACTLY this structure:
@@ -51,16 +77,16 @@ Return a JSON object matching EXACTLY this structure:
   "generalInstruction": string,
   "sections": [
     {
-      "title": string,
-      "questionTypeName": string,
+      "title": string, // e.g. "Section A"
+      "questionTypeName": string, // e.g. "Multiple Choice Questions"
       "instruction": string,
       "questions": [
         {
           "id": number,
-          "text": string,
+          "text": string, // Only the question text
           "difficulty": "easy" | "medium" | "hard",
           "marks": number,
-          "options": ["A) ...", "B) ...", "C) ...", "D) ..."] // ONLY include for Multiple Choice questions, omit for all other types
+          "options": ["A) ...", "B) ..."] // REQUIRED for MCQ (4 options) and True/False (2 options), OMIT for all others
         }
       ]
     }

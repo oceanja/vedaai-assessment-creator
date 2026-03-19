@@ -91,4 +91,8 @@ worker.on("ready", () => {
   console.log("[Worker] Generation worker ready");
 });
 
+worker.on("error", (err) => {
+  console.error("[Worker] Redis Connection error:", err.message);
+});
+
 export default worker;

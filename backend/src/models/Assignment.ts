@@ -28,6 +28,7 @@ const GeneratedQuestionSchema = new Schema({
   text: String,
   difficulty: { type: String, enum: ["easy", "medium", "hard"] },
   marks: Number,
+  options: [String],
 }, { _id: false });
 
 const GeneratedSectionSchema = new Schema({
